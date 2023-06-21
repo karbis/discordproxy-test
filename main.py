@@ -6,7 +6,9 @@ import httpx
 app = FastAPI()
 
 # CORS Configuration
-origins = ["*"]
+origins = ["*",
+    # Add more allowed origins as needed
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,7 +24,12 @@ def index():
     return RedirectResponse(url="https://discord.com")
 
 
-@app.route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+@app.get("/api/{path:path}")
+@app.post("/api/{path:path}")
+@app.put("/api/{path:path}")
+@app.patch("/api/{path:path}")
+@app.delete("/api/{path:path}")
+@app.options("/api/{path:path}")
 async def proxy_request(path: str, request: Request):
     discord_url = f"https://discord.com/api/{path}"
 
