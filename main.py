@@ -12,7 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/channels")
+@app.post("/channels")
 def get_channels(id: int, authorization: str):
     url = f"https://discord.com/api/v10/guilds/{id}/channels"
     headers = {"Authorization": authorization}
@@ -25,7 +25,7 @@ def get_channels(id: int, authorization: str):
 
 @app.post("/vc")
 def set_vc(serverId: int, userId: int, channel_id: int, authorization: str):
-    url = f"https://discord.com/api/v10/guilds/{serverId}/members/{userId}"
+    url = f"https://discordapp.com/api/v9/guilds/{serverId}/members/{userId}"
     headers = {"Authorization": authorization}
     json_data = {"channel_id": channel_id}
 
@@ -34,5 +34,3 @@ def set_vc(serverId: int, userId: int, channel_id: int, authorization: str):
         return response.json()
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
-
-#its not a proxy soryr i lied
