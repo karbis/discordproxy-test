@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
@@ -14,7 +14,7 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def proxy_request(request, call_next):
+async def proxy_request(request: Request, call_next):
     try:
         # Modify the URL as per your needs
         url = f"https://discord.com{request.url.path}"
@@ -24,11 +24,11 @@ async def proxy_request(request, call_next):
             response = await client.request(
                 method=request.method,
                 url=url,
-                headers=request.headers,
+                headers=dict(request.headers),
                 data=await request.body(),
             )
 
         # Return the response from Discord
-        return response
+        return response.content
     except httpx.RequestError as e:
         raise HTTPException(status_code=502, detail=str(e))
