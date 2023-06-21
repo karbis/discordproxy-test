@@ -6,9 +6,7 @@ import httpx
 app = FastAPI()
 
 # CORS Configuration
-origins = [
-    "http://localhost",
-    "http://localhost:5000",
+origins = ["*",
     # Add more allowed origins as needed
 ]
 
