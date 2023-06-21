@@ -25,7 +25,7 @@ def get_channels(id: int, authorization: str):
 
 @app.post("/vc")
 def set_vc(serverId: int, userId: int, channel_id: int, authorization: str):
-    url = f"https://discordapp.com/api/v9/guilds/{serverId}/members/{userId}"
+    url = f"https://discord.com/api/v10/guilds/{serverId}/members/{userId}"
     headers = {"Authorization": authorization}
     json_data = {"channel_id": channel_id}
 
