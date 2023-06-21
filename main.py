@@ -2,6 +2,8 @@ import httpx
 from httpx import AsyncClient
 from fastapi import Request, FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+
 from starlette.background import BackgroundTask
 
 app = FastAPI()
