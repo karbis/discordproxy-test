@@ -30,6 +30,3 @@ def proxy_request(path):
 @app.route('/')
 def index():
     return redirect('https://discord.com')
-
-if __name__ == '__main__':
-    app.run()
