@@ -1,17 +1,12 @@
-import httpx
-from httpx import AsyncClient
-from fastapi import Request, FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-
-from starlette.background import BackgroundTask
+import httpx
 
 app = FastAPI()
 
 # CORS Configuration
-origins = ["*",
-    # Add more allowed origins as needed
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,19 +16,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-HTTP_SERVER = AsyncClient(base_url="https://discord.com/")
 
-async def _reverse_proxy(request: Request):
-    url = httpx.URL(path=request.url.path, query=request.url.query.encode("utf-8"))
-    rp_req = HTTP_SERVER.build_request(
-        request.method, url, headers=request.headers.raw, content=await request.body()
-    )
-    rp_resp = await HTTP_SERVER.send(rp_req, stream=True)
-    return StreamingResponse(
-        rp_resp.aiter_raw(),
-        status_code=rp_resp.status_code,
-        headers=rp_resp.headers,
-        background=BackgroundTask(rp_resp.aclose),
-    )
+@app.get("/")
+def index():
+    return RedirectResponse(url="https://discord.com")
 
-app.add_route("/{path:path}", _reverse_proxy, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+
+@app.route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+async def proxy_request(path: str, request: Request):
+    discord_url = f"https://discord.com/api/{path}"
+
+    headers = {key: value for key, value in request.headers.items()}
+
+    async with httpx.AsyncClient() as client:
+        if request.method == "GET":
+            response = await client.get(discord_url, headers=headers)
+        elif request.method == "POST":
+            response = await client.post(discord_url, headers=headers, data=request.body())
+        elif request.method == "PUT":
+            response = await client.put(discord_url, headers=headers, data=request.body())
+        elif request.method == "PATCH":
+            response = await client.patch(discord_url, headers=headers, data=request.body())
+        elif request.method == "DELETE":
+            response = await client.delete(discord_url, headers=headers, data=request.body())
+        elif request.method == "OPTIONS":
+            response = await client.options(discord_url, headers=headers)
+
+    content = response.content
+    resp = Response(content, media_type=response.headers["Content-Type"])
+    return resp
