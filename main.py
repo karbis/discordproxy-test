@@ -9,7 +9,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -20,7 +20,7 @@ def index():
 
 
 @app.route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
-async def proxy_request(request: Request, path: str):
+async def proxy_request(path: str, request: Request):
     discord_url = f"https://discord.com/api/{path}"
 
     headers = {key: value for key, value in request.headers.items()}
