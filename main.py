@@ -13,7 +13,7 @@ app.add_middleware(
 )
 
 
-@app.post("/channels")
+@app.get("/channels")
 def get_channels(id: int, authorization: str):
     headers = {"Authorization": authorization}
     url = f"https://discord.com/api/v10/guilds/{id}/channels"
@@ -27,10 +27,24 @@ def get_channels(id: int, authorization: str):
 
 
 @app.post("/vc")
-def patch_member(serverId: int, userId: int, channel_id: int, authorization: str):
+def join_voice_channel(serverId: int, userId: int, channel_id: int, authorization: str):
     headers = {"Authorization": authorization, "Content-Type": "application/json"}
     url = f"https://discord.com/api/v10/guilds/{serverId}/members/{userId}"
     body = {"channel_id": channel_id}
+
+    response = requests.patch(url, json=body, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
+@app.post("/leave")
+def leave_voice_channel(serverId: int, userId: int, authorization: str):
+    headers = {"Authorization": authorization, "Content-Type": "application/json"}
+    url = f"https://discord.com/api/v10/guilds/{serverId}/members/{userId}"
+    body = {"channel_id": None}
 
     response = requests.patch(url, json=body, headers=headers)
 
